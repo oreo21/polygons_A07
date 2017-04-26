@@ -114,7 +114,7 @@ void parse_file ( char * filename,
 
       sscanf(line, "%lf %lf %lf %lf",
 	     xvals, yvals, zvals, &r);
-      add_sphere( edges, xvals[0], yvals[0], zvals[0], r, step);
+      add_sphere( edges, xvals[0], yvals[0], zvals[0], r, step * 5);
     }//end of sphere
 
     else if ( strncmp(line, "torus", strlen(line)) == 0 ) {
@@ -123,7 +123,7 @@ void parse_file ( char * filename,
 
       sscanf(line, "%lf %lf %lf %lf %lf",
 	     xvals, yvals, zvals, &r, &r1);
-      add_torus( edges, xvals[0], yvals[0], zvals[0], r, r1, step);
+      add_torus( edges, xvals[0], yvals[0], zvals[0], r, r1, step * 5);
     }//end of torus
 
     else if ( strncmp(line, "circle", strlen(line)) == 0 ) {
@@ -135,7 +135,7 @@ void parse_file ( char * filename,
       add_circle( edges, xvals[0], yvals[0], zvals[0], r, step);
     }//end of circle
 
-    else if ( strncmp(line, "hermite", strlen(line)) == 0 ||
+    else if ( strncmp(line, "hermite", strlen	(line)) == 0 ||
 	      strncmp(line, "bezier", strlen(line)) == 0 ) {
       if (strncmp(line, "hermite", strlen(line)) == 0 )
 	type = HERMITE;
@@ -197,7 +197,7 @@ void parse_file ( char * filename,
 
     else if ( strncmp(line, "rotate", strlen(line)) == 0 ) {
       fgets(line, sizeof(line), f);
-      printf("Rotate\t%s", line);
+      printf("ROTATE\t%s", line);
       sscanf(line, "%c %lf",
 	     &axis, &theta);
       /* printf("%c %lf\n", */
@@ -214,22 +214,22 @@ void parse_file ( char * filename,
     }//end rotate
 
     else if ( strncmp(line, "clear", strlen(line)) == 0 ) {
-      printf("clear\t%s", line);
+      printf("CLEAR\n");
       edges->lastcol = 0;
     }//end clear
 
     else if ( strncmp(line, "ident", strlen(line)) == 0 ) {
-      printf("IDENT\t%s", line);
+      printf("IDENT\n");
       ident(transform);
     }//end ident
 
     else if ( strncmp(line, "apply", strlen(line)) == 0 ) {
-      printf("APPLY\t%s", line);
+      printf("APPLY\n");
       matrix_mult(transform, edges);
     }//end apply
 
     else if ( strncmp(line, "display", strlen(line)) == 0 ) {
-      printf("DISPLAY\t%s", line);
+      printf("DISPLAY\n");
       clear_screen(s);
       draw_polygons(edges, s, c);
       display( s );
@@ -238,12 +238,12 @@ void parse_file ( char * filename,
     else if ( strncmp(line, "save", strlen(line)) == 0 ) {
       fgets(line, sizeof(line), f);
       *strchr(line, '\n') = 0;
-      printf("SAVE\t%s\n", line);
+      printf("SAVE\n");
       clear_screen(s);
       draw_polygons(edges, s, c);
       save_extension(s, line);
     }//end save
-    printf("\nprinting current edges matrix\n"), print_matrix(edges);
-  	printf("\nprinting current transform matrix\n"), print_matrix(transform);
+    //printf("\nprinting current edges matrix\n"), print_matrix(edges);
+  	//printf("\nprinting current transform matrix\n"), print_matrix(transform);
   }
 }

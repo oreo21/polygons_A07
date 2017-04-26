@@ -118,30 +118,42 @@ void add_box( struct matrix * polygons,
   should call generate_sphere to create the
   necessary points
   ====================*/
-void add_sphere( struct matrix * edges,
+void add_sphere( struct matrix * polygons,
 		 double cx, double cy, double cz,
 		 double r, double step ) {
 
   struct matrix *points = generate_sphere(cx, cy, cz, r, step);
-  int num_steps = (int)(1/step +0.1);
+  int num_steps = (int)(1/step + 0.1);
   int index, lat, longt;
   int latStop, longStop, latStart, longStart;
   latStart = 0;
   latStop = num_steps;
   longStart = 0;
   longStop = num_steps;
-
+  int L = (*points).lastcol;
+  
   num_steps++;
   for ( lat = latStart; lat < latStop; lat++ ) {
     for ( longt = longStart; longt <= longStop; longt++ ) {
-
       index = lat * (num_steps) + longt;
-      add_edge( edges, points->m[0][index],
-		points->m[1][index],
-		points->m[2][index],
-		points->m[0][index] + 1,
-		points->m[1][index] + 1,
-		points->m[2][index] + 1);
+      int x0 = (*points).m[0][index];
+      int y0 = (*points).m[1][index];
+      int z0 = (*points).m[2][index];
+      //printf("x0, y0, z0 = %d, %d, %d\n", x0, y0, z0);
+      int x1 = (*points).m[0][(index + 1) % L];
+      int y1 = (*points).m[1][(index + 1) % L]; 
+      int z1 = (*points).m[2][(index + 1) % L];
+      //printf("x1, y1, z1 = %d, %d, %d\n", x1, y1, z1);
+      int x2 = (*points).m[0][(index + num_steps) % L]; 
+      int y2 = (*points).m[1][(index + num_steps) % L];
+      int z2 = (*points).m[2][(index + num_steps) % L];
+      //printf("x2, y2, z2 = %d, %d, %d\n", x2, y2, z2);      
+      int x3 = (*points).m[0][(index + num_steps + 1) % L];
+      int y3 = (*points).m[1][(index + num_steps + 1) % L];
+      int z3 = (*points).m[2][(index + num_steps + 1) % L];
+      //printf("x3, y3, z3 = %d, %d, %d\n", x3, y3, z3);
+      add_polygon(polygons, x1, y1, z1, x0, y0, z0, x2, y2, z2);
+      add_polygon(polygons, x1, y1, z1, x2, y2, z2, x3, y3, z3);
     }
   }
   free_matrix(points);
@@ -162,7 +174,6 @@ struct matrix * generate_sphere(double cx, double cy, double cz,
 				double r, double step ) {
 
   int num_steps = (int)(1/step + 0.1);
-
   struct matrix *points = new_matrix(4, num_steps * num_steps);
   int circle, rotation, rot_start, rot_stop, circ_start, circ_stop;
   double x, y, z, rot, circ;
@@ -210,7 +221,7 @@ struct matrix * generate_sphere(double cx, double cy, double cz,
   should call generate_torus to create the
   necessary points
   ====================*/
-void add_torus( struct matrix * edges,
+void add_torus( struct matrix * polygons,
 		double cx, double cy, double cz,
 		double r1, double r2, double step ) {
 
@@ -222,17 +233,30 @@ void add_torus( struct matrix * edges,
   latStop = num_steps;
   longStart = 0;
   longStop = num_steps;
+  int L = (*points).lastcol;
 
   for ( lat = latStart; lat < latStop; lat++ ) {
     for ( longt = longStart; longt < longStop; longt++ ) {
 
       index = lat * (num_steps) + longt;
-      add_edge( edges, points->m[0][index],
-		points->m[1][index],
-		points->m[2][index],
-		points->m[0][index] + 1,
-		points->m[1][index] + 1,
-		points->m[2][index] + 1);
+      int x0 = (*points).m[0][index];
+      int y0 = (*points).m[1][index];
+      int z0 = (*points).m[2][index];
+      //printf("x0, y0, z0 = %d, %d, %d\n", x0, y0, z0);
+      int x1 = (*points).m[0][(index + 1) % L];
+      int y1 = (*points).m[1][(index + 1) % L]; 
+      int z1 = (*points).m[2][(index + 1) % L];
+      //printf("x1, y1, z1 = %d, %d, %d\n", x1, y1, z1);
+      int x2 = (*points).m[0][(index + num_steps) % L]; 
+      int y2 = (*points).m[1][(index + num_steps) % L];
+      int z2 = (*points).m[2][(index + num_steps) % L];
+      //printf("x2, y2, z2 = %d, %d, %d\n", x2, y2, z2);      
+      int x3 = (*points).m[0][(index + num_steps + 1) % L];
+      int y3 = (*points).m[1][(index + num_steps + 1) % L];
+      int z3 = (*points).m[2][(index + num_steps + 1) % L];
+      //printf("x3, y3, z3 = %d, %d, %d\n", x3, y3, z3);
+      add_polygon(polygons, x1, y1, z1, x0, y0, z0, x2, y2, z2);
+      add_polygon(polygons, x1, y1, z1, x2, y2, z2, x3, y3, z3);
     }
   }
   free_matrix(points);
@@ -253,8 +277,7 @@ void add_torus( struct matrix * edges,
   ====================*/
 struct matrix * generate_torus( double cx, double cy, double cz,
 				double r1, double r2, double step ) {
-  int num_steps = (int)(1/step +0.1);
-
+  int num_steps = (int)(1/step + 0.1);
   struct matrix *points = new_matrix(4, num_steps * num_steps);
   int circle, rotation, rot_start, rot_stop, circ_start, circ_stop;
   double x, y, z, rot, circ;
