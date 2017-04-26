@@ -27,26 +27,9 @@ void add_polygon( struct matrix *polygons,
 		  double x0, double y0, double z0,
 		  double x1, double y1, double z1,
 		  double x2, double y2, double z2 ) {
-  if ( (*polygons).lastcol == (*polygons).cols )
-	  grow_matrix(polygons, (*polygons).lastcol + 100);
-
-  (*polygons).m[0][(*polygons).lastcol] = x0;
-  (*polygons).m[1][(*polygons).lastcol] = y0;
-	(*polygons).m[2][(*polygons).lastcol] = z0;
-	(*polygons).m[3][(*polygons).lastcol] = 1;
-	(*polygons).lastcol++;
-
-	(*polygons).m[0][(*polygons).lastcol] = x1;
-  (*polygons).m[1][(*polygons).lastcol] = y1;
-	(*polygons).m[2][(*polygons).lastcol] = z1;
-	(*polygons).m[3][(*polygons).lastcol] = 1;
-	(*polygons).lastcol++;
-
-	(*polygons).m[0][(*polygons).lastcol] = x2;
-  (*polygons).m[1][(*polygons).lastcol] = y2;
-	(*polygons).m[2][(*polygons).lastcol] = z2;
-	(*polygons).m[3][(*polygons).lastcol] = 1;
-	(*polygons).lastcol++;
+	add_point(polygons, x0, y0, z0);
+	add_point(polygons, x1, y1, z1);
+	add_point(polygons, x2, y2, z2);
 }
 
 /*======== void draw_polygons() ==========
@@ -64,7 +47,7 @@ void draw_polygons( struct matrix *polygons, screen s, color c ) {
 	   return;
 	}
 	int point;
-	for (point=0; point < (*polygons).lastcol-1; point+=3){
+	for (point=0; point < (*polygons).lastcol-2; point+=3){
 		draw_line((*polygons).m[0][point], (*polygons).m[1][point],
 		(*polygons).m[0][point+1], (*polygons).m[1][point+1], s, c);
 		draw_line((*polygons).m[0][point+1], (*polygons).m[1][point+1],
@@ -89,7 +72,7 @@ void draw_polygons( struct matrix *polygons, screen s, color c ) {
   upper-left corner is (x, y, z) with width,
   height and depth dimensions.
   ====================*/
-void add_box( struct matrix * edges,
+void add_box( struct matrix * polygons,
 	      double x, double y, double z,
 	      double width, double height, double depth ) {
 
@@ -100,18 +83,24 @@ void add_box( struct matrix * edges,
   y1 = y-height;
   z0 = z;
   z1 = z-depth;
-
   //front
-  add_edge(edges, x0, y0, z0, x0+2, y0+2, z0+2);
-  add_edge(edges, x1, y0, z0, x1+2, y0+2, z0+2);
-  add_edge(edges, x1, y1, z0, x1+2, y1+2, z0+2);
-  add_edge(edges, x0, y1, z0, x0+2, y1+2, z0+2);
-
+	add_polygon(polygons, x0, y0, z0, x1, y1, z0, x1, y0, z0);
+	add_polygon(polygons, x0, y0, z0, x0, y1, z0, x1, y1, z0);
   //back
-  add_edge(edges, x0, y0, z1, x0+2, y0+2, z1+2);
-  add_edge(edges, x1, y0, z1, x1+2, y0+2, z1+2);
-  add_edge(edges, x1, y1, z1, x1+2, y1+2, z1+2);
-  add_edge(edges, x0, y1, z1, x0+2, y1+2, z1+2);
+	add_polygon(polygons, x0, y0, z1, x1, y1, z1, x1, y0, z1);
+	add_polygon(polygons, x0, y0, z1, x0, y1, z1, x1, y1, z1);
+  //left
+	add_polygon(polygons, x0, y0, z1, x0, y1, z0, x0, y0, z0);
+	add_polygon(polygons, x0, y0, z1, x0, y1, z1, x0, y1, z0); 
+  //right
+	add_polygon(polygons, x1, y0, z1, x1, y1, z0, x1, y0, z0);
+	add_polygon(polygons, x1, y0, z1, x1, y1, z1, x1, y1, z0);
+  //top
+	add_polygon(polygons, x0, y0, z1, x1, y0, z0, x1, y0, z1);
+	add_polygon(polygons, x0, y0, z1, x0, y0, z0, x1, y0, z0);
+  //bottom
+	add_polygon(polygons, x0, y1, z1, x1, y1, z0, x1, y1, z1);
+	add_polygon(polygons, x0, y1, z1, x0, y1, z0, x1, y1, z0);
 }
 
 /*======== void add_sphere() ==========
@@ -172,7 +161,7 @@ void add_sphere( struct matrix * edges,
 struct matrix * generate_sphere(double cx, double cy, double cz,
 				double r, double step ) {
 
-  int num_steps = (int)(1/step +0.1);
+  int num_steps = (int)(1/step + 0.1);
 
   struct matrix *points = new_matrix(4, num_steps * num_steps);
   int circle, rotation, rot_start, rot_stop, circ_start, circ_stop;
