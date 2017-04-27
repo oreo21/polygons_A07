@@ -46,15 +46,30 @@ void draw_polygons( struct matrix *polygons, screen s, color c ) {
 	   printf("Need at least 3 points to draw a triangle!\n");
 	   return;
 	}
-	int point;
+	int point, x0, y0, x1, y1, x2, y2, draw;
 	for (point=0; point < (*polygons).lastcol-2; point+=3){
-		draw_line((*polygons).m[0][point], (*polygons).m[1][point],
-		(*polygons).m[0][point+1], (*polygons).m[1][point+1], s, c);
-		draw_line((*polygons).m[0][point+1], (*polygons).m[1][point+1],
-		(*polygons).m[0][point+2], (*polygons).m[1][point+2], s, c);
-		draw_line((*polygons).m[0][point+2], (*polygons).m[1][point+2],
-		(*polygons).m[0][point], (*polygons).m[1][point], s, c);
+		x0 = (*polygons).m[0][point], y0 = (*polygons).m[1][point];
+		x1 = (*polygons).m[0][point+1], y1 = (*polygons).m[1][point+1];
+		x2 = (*polygons).m[0][point+2], y2 = (*polygons).m[1][point+2];
+		draw = check_surface(x0, y0, x1, y1, x2, y2);
+		
+		if (draw > 0){
+			draw_line((*polygons).m[0][point], (*polygons).m[1][point],
+			(*polygons).m[0][point+1], (*polygons).m[1][point+1], s, c);
+			draw_line((*polygons).m[0][point+1], (*polygons).m[1][point+1],
+			(*polygons).m[0][point+2], (*polygons).m[1][point+2], s, c);
+			draw_line((*polygons).m[0][point+2], (*polygons).m[1][point+2],
+			(*polygons).m[0][point], (*polygons).m[1][point], s, c);
+		}
 	}
+}
+
+int check_surface(int x0, int y0, int x1, int y1, int x2, int y2){
+	int Ax, Ay, Bx, By, Nz;
+	Ax = x1 - x0, Ay = y1 - y0;
+	Bx = x2 - x0, By = y2 - y0;
+	Nz = Ax * By - Ay * Bx; //= cos(theta) 
+	return Nz;
 }
 
 
@@ -87,20 +102,20 @@ void add_box( struct matrix * polygons,
 	add_polygon(polygons, x0, y0, z0, x1, y1, z0, x1, y0, z0);
 	add_polygon(polygons, x0, y0, z0, x0, y1, z0, x1, y1, z0);
   //back
-	add_polygon(polygons, x0, y0, z1, x1, y1, z1, x1, y0, z1);
-	add_polygon(polygons, x0, y0, z1, x0, y1, z1, x1, y1, z1);
+	add_polygon(polygons, x0, y0, z1, x1, y0, z1, x1, y1, z1);
+	add_polygon(polygons, x0, y0, z1, x1, y1, z1, x0, y1, z1);
   //left
 	add_polygon(polygons, x0, y0, z1, x0, y1, z0, x0, y0, z0);
 	add_polygon(polygons, x0, y0, z1, x0, y1, z1, x0, y1, z0); 
   //right
-	add_polygon(polygons, x1, y0, z1, x1, y1, z0, x1, y0, z0);
-	add_polygon(polygons, x1, y0, z1, x1, y1, z1, x1, y1, z0);
+	add_polygon(polygons, x1, y0, z1, x1, y0, z0, x1, y1, z0);
+	add_polygon(polygons, x1, y0, z1, x1, y1, z0, x1, y1, z1);
   //top
 	add_polygon(polygons, x0, y0, z1, x1, y0, z0, x1, y0, z1);
 	add_polygon(polygons, x0, y0, z1, x0, y0, z0, x1, y0, z0);
   //bottom
-	add_polygon(polygons, x0, y1, z1, x1, y1, z0, x1, y1, z1);
-	add_polygon(polygons, x0, y1, z1, x0, y1, z0, x1, y1, z0);
+	add_polygon(polygons, x0, y1, z1, x1, y1, z1, x1, y1, z0);
+	add_polygon(polygons, x0, y1, z1, x1, y1, z0, x0, y1, z0);
 }
 
 /*======== void add_sphere() ==========
